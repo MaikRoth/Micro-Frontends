@@ -12,7 +12,7 @@ app.get('/topics/:topicName', (req, res) => {
   res.json(messages);
 });
 
-const PORT = 4000;
+const PORT = 4004;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

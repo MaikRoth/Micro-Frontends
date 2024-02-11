@@ -5,10 +5,13 @@ const kafka = new Kafka({
   brokers: ['localhost:29092']
 });
 
-const consumer = kafka.consumer({ groupId: 'GameConsumer' });
+const consumer = kafka.consumer({ groupId: 'gameConsumer' });
 const messages = {};
 
-const run = async () => {
+let updateFrontendCallback; 
+const init = async (updateCallback) => {
+  updateFrontendCallback = updateCallback; 
+
   await consumer.connect();
 
   const topics = [
@@ -23,11 +26,10 @@ const run = async () => {
   await consumer.run({
     eachMessage: async ({ topic, partition, message }) => {
       const messageValue = message.value.toString();
-      messages[topic].push(messageValue);
+      messages[topic].push(JSON.parse(messageValue));
+      updateFrontendCallback(addTypeToMessage(topic, JSON.parse(messageValue)));
       console.log(topic, messageValue);
-
-      const parsedMessage = JSON.parse(messageValue);
-      if (parsedMessage.status === "ended") {
+      if (messageValue.status === "ended") {
         messages[topic] = [];
         messages['roundStatus'] = [];
         console.log(`All messages for topic "${topic}" have been deleted.`);
@@ -35,9 +37,14 @@ const run = async () => {
     },
   });
 };
-
-run().catch(console.error);
+function addTypeToMessage(topic, message) {
+  return {
+    type: topic,
+    message: {...message}
+  };
+}
 
 module.exports = {
+  init,
   getMessages: (topic) => messages[topic] || []
 };

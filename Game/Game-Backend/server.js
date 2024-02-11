@@ -24,13 +24,15 @@ function broadcastData(data) {
   });
 }
 
+
 function updateFrontend(data) {
   broadcastData(data);
 }
 
 kafkaConsumer.init(updateFrontend);
 
-const PORT = 4002;
+
+const PORT = 4000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

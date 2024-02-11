@@ -5,28 +5,25 @@ function App() {
     const [planets, setPlanets] = useState([]);
 
     useEffect(() => {
-        fetch('http://localhost:4002/topics/status')
-            .then(response => response.json())
-            .then(data => {
-                const statuses = data.map(item => JSON.parse(item));
-                const latestStatus = statuses[statuses.length - 1]?.status; 
+        const ws = new WebSocket('ws://localhost:4002'); 
 
-                if (latestStatus === 'ended') {
-                    setPlanets([]);
-                } else if (latestStatus === 'started') {
-                    fetch('http://localhost:4002/topics/gameworld')
-                        .then(response => response.json())
-                        .then(data => {
-                            const allPlanets = data.flatMap(item => {
-                                const parsedItem = JSON.parse(item);
-                                return parsedItem.planets || [];
-                            });
-                            setPlanets(allPlanets);
-                        })
-                        .catch(error => console.error('Error fetching planets:', error));
-                }
-            })
-            .catch(error => console.error('Error fetching status:', error));
+        ws.onopen = () => {
+            console.log('Map WebSocket Connected');
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            const allPlanets = data.flatMap(row => row.filter(cell => cell !== null));
+            setPlanets(allPlanets);
+        };
+
+        ws.onerror = (error) => {
+            console.log('WebSocket Error:', error);
+        };
+
+        return () => {
+            ws.close();
+        };
     }, []);
 
     return (

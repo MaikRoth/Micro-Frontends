@@ -27,8 +27,9 @@ const PlanetsGrid = ({ planets }) => {
     <>
       <div className="counts">
         <span>Planets: {planetCount}</span>
-        <span>No Planets: {emptyCount}</span>
+        <span>Black Holes: {emptyCount}</span>
       </div>
+
       <div className="grid">
         {grid.map((row, y) => (
           <div key={y} className="row">
@@ -50,11 +51,12 @@ const PlanetsGrid = ({ planets }) => {
 };
 
 function formatResourceAmount(amount) {
-  if (amount < 1000) {
-    return amount.toString();
-  } else {
-    return (amount / 1000).toFixed(1) + 'k';
+  if (amount >= 1000) {
+    const thousands = Math.floor(amount / 1000); 
+    const hundred = Math.floor((amount % 1000) / 100); 
+    return `${thousands}.${hundred}k`;
   }
+  return amount.toString();
 }
 
 export default PlanetsGrid;
